@@ -1,11 +1,37 @@
 package cpu
 
 type CPU6502 struct {
-	bus Bus
+	bus     Bus
+	lookup  [2]Instruction
+	a       uint8
+	x       uint8
+	y       uint8
+	stkp    uint8
+	pc      uint16
+	status  uint8
+	fetched uint8
+	addrAbs uint16
+	addrRel uint16
+	opcode  uint8
+	cycles  uint8
 }
 
 func NewCPU6502() *CPU6502 {
-	return &CPU6502{}
+	cpu := &CPU6502{
+		a:       0x00,
+		x:       0x00,
+		y:       0x00,
+		stkp:    0x00,
+		pc:      0x00,
+		status:  0x00,
+		fetched: 0x00,
+		addrAbs: 0x00,
+		addrRel: 0x00,
+		opcode:  0x00,
+		cycles:  0,
+	}
+	cpu.lookup = [2]Instruction{{"BRK", (*cpu).BRK, (*cpu).IMM, false, 7}, {"RTI", (*cpu).RTI, (*cpu).IMP, true, 6}}
+	return cpu
 }
 
 func (c *CPU6502) ConnectBus(bus Bus) {
@@ -23,11 +49,15 @@ func (c *CPU6502) Write(addr uint16, data uint8) {
 // TODO: Implement the get and set flag methods
 
 func (c *CPU6502) GetFlag(flag Flags6502) bool {
-	return true
+	return (c.status & uint8(flag)) > 0
 }
 
 func (c *CPU6502) SetFlag(flag Flags6502, value bool) {
-	return
+	if value {
+		c.status |= uint8(flag)
+	} else {
+		c.status &= ^uint8(flag)
+	}
 }
 
 type Flags6502 uint8
@@ -44,28 +74,6 @@ const (
 	N                       // Negative
 )
 
-// Registers
-var a uint8 = 0x00
-var x uint8 = 0x00
-var y uint8 = 0x00
-var stkp uint8 = 0x00
-var pc uint16 = 0x0000
-var status uint8 = 0x00
-
-// Addressing modes
-func (c *CPU6502) IMP() uint8 { return 0 }
-func (c *CPU6502) IMM() uint8 { return 0 }
-func (c *CPU6502) ZP0() uint8 { return 0 }
-func (c *CPU6502) ZPX() uint8 { return 0 }
-func (c *CPU6502) ZPY() uint8 { return 0 }
-func (c *CPU6502) REL() uint8 { return 0 }
-func (c *CPU6502) ABS() uint8 { return 0 }
-func (c *CPU6502) ABX() uint8 { return 0 }
-func (c *CPU6502) ABY() uint8 { return 0 }
-func (c *CPU6502) IND() uint8 { return 0 }
-func (c *CPU6502) IZX() uint8 { return 0 }
-func (c *CPU6502) IZY() uint8 { return 0 }
-
 /*
 const (
 	// Status register flags
@@ -79,62 +87,96 @@ const (
 	N
 )
 */
-// TODO: Refactor the instructions to the instructions.go
 
-// Instructions
-func (c *CPU6502) ADC() uint8 { return 0 }
-func (c *CPU6502) AND() uint8 { return 0 }
-func (c *CPU6502) ASL() uint8 { return 0 }
-func (c *CPU6502) BCC() uint8 { return 0 }
-func (c *CPU6502) BCS() uint8 { return 0 }
-func (c *CPU6502) BEQ() uint8 { return 0 }
-func (c *CPU6502) BIT() uint8 { return 0 }
-func (c *CPU6502) BMI() uint8 { return 0 }
-func (c *CPU6502) BNE() uint8 { return 0 }
-func (c *CPU6502) BPL() uint8 { return 0 }
-func (c *CPU6502) BRK() uint8 { return 0 }
-func (c *CPU6502) BVC() uint8 { return 0 }
-func (c *CPU6502) BVS() uint8 { return 0 }
-func (c *CPU6502) CLC() uint8 { return 0 }
-func (c *CPU6502) CLD() uint8 { return 0 }
-func (c *CPU6502) CLI() uint8 { return 0 }
-func (c *CPU6502) CLV() uint8 { return 0 }
-func (c *CPU6502) CMP() uint8 { return 0 }
-func (c *CPU6502) CPX() uint8 { return 0 }
-func (c *CPU6502) CPY() uint8 { return 0 }
-func (c *CPU6502) DEC() uint8 { return 0 }
-func (c *CPU6502) DEX() uint8 { return 0 }
-func (c *CPU6502) DEY() uint8 { return 0 }
-func (c *CPU6502) EOR() uint8 { return 0 }
-func (c *CPU6502) INC() uint8 { return 0 }
-func (c *CPU6502) INX() uint8 { return 0 }
-func (c *CPU6502) INY() uint8 { return 0 }
-func (c *CPU6502) JMP() uint8 { return 0 }
-func (c *CPU6502) JSR() uint8 { return 0 }
-func (c *CPU6502) LDA() uint8 { return 0 }
-func (c *CPU6502) LDX() uint8 { return 0 }
-func (c *CPU6502) LDY() uint8 { return 0 }
-func (c *CPU6502) LSR() uint8 { return 0 }
-func (c *CPU6502) NOP() uint8 { return 0 }
-func (c *CPU6502) ORA() uint8 { return 0 }
-func (c *CPU6502) PHA() uint8 { return 0 }
-func (c *CPU6502) PHP() uint8 { return 0 }
-func (c *CPU6502) PLA() uint8 { return 0 }
-func (c *CPU6502) PLP() uint8 { return 0 }
-func (c *CPU6502) ROL() uint8 { return 0 }
-func (c *CPU6502) ROR() uint8 { return 0 }
-func (c *CPU6502) RTI() uint8 { return 0 }
-func (c *CPU6502) RTS() uint8 { return 0 }
-func (c *CPU6502) SBC() uint8 { return 0 }
-func (c *CPU6502) SEC() uint8 { return 0 }
-func (c *CPU6502) SED() uint8 { return 0 }
-func (c *CPU6502) SEI() uint8 { return 0 }
-func (c *CPU6502) STA() uint8 { return 0 }
-func (c *CPU6502) STX() uint8 { return 0 }
-func (c *CPU6502) STY() uint8 { return 0 }
-func (c *CPU6502) TAX() uint8 { return 0 }
-func (c *CPU6502) TAY() uint8 { return 0 }
-func (c *CPU6502) TSX() uint8 { return 0 }
-func (c *CPU6502) TXA() uint8 { return 0 }
-func (c *CPU6502) TXS() uint8 { return 0 }
-func (c *CPU6502) TYA() uint8 { return 0 }
+// TODO: Refactor the instructions to the instructions.go
+// Registers
+
+// Addressing modes
+
+func (c *CPU6502) Clock() {
+	if c.cycles == 0 {
+		c.opcode = c.Read(c.pc)
+		c.pc++
+		c.cycles = c.lookup[c.opcode].Cycles
+		additionalCycle1 := c.lookup[c.opcode].AddressMode()
+		additionalCycle2 := c.lookup[c.opcode].Operate()
+
+		c.cycles += (additionalCycle1 & additionalCycle2)
+	}
+	c.cycles--
+}
+
+func (c *CPU6502) Reset() {
+	c.a = 0
+	c.x = 0
+	c.y = 0
+	c.stkp = 0xFD
+	c.status = 0x00 | uint8(U)
+	c.addrAbs = 0xFFFC
+	lo := uint16(c.Read(c.addrAbs + 0))
+	hi := uint16(c.Read(c.addrAbs + 1))
+	c.pc = (hi << 8) | lo
+	c.addrRel = 0x0000
+	c.addrAbs = 0x0000
+	c.fetched = 0x00
+	c.cycles = 8
+}
+func (c *CPU6502) IRQ() {
+	if !c.GetFlag(I) {
+		c.Write(0x0100+uint16(c.stkp), uint8((c.pc >> 8) & 0x00FF))
+		c.stkp--
+		c.Write(0x0100+uint16(c.stkp), uint8(c.pc & 0x00FF))
+		c.stkp--
+
+		c.SetFlag(B, false)
+		c.SetFlag(U, true)
+		c.SetFlag(I, true)
+		c.Write(0x0100+uint16(c.stkp), c.status)
+		c.stkp--
+
+		c.addrAbs = 0xFFFE
+		lo := uint16(c.Read(c.addrAbs + 0))
+		hi := uint16(c.Read(c.addrAbs + 1))
+		c.pc = (hi << 8) | lo
+		c.cycles = 7
+	
+	}
+  }
+func (c *CPU6502) NMI() {
+	c.Write(0x0100+uint16(c.stkp), uint8((c.pc >> 8) & 0x00FF))
+	c.stkp--
+	c.Write(0x0100+uint16(c.stkp), uint8(c.pc & 0x00FF))
+	c.stkp--
+
+	c.SetFlag(B, false)
+	c.SetFlag(U, true)
+	c.SetFlag(I, true)
+	c.Write(0x0100+uint16(c.stkp), c.status)
+	c.stkp--
+
+	c.addrAbs = 0xFFFA
+	lo := uint16(c.Read(c.addrAbs + 0))
+	hi := uint16(c.Read(c.addrAbs + 1))
+	c.pc = (hi << 8) | lo
+	c.cycles = 8
+}
+
+func (c *CPU6502) Fetch() uint8 {
+	if !c.lookup[c.opcode].IMPFlag {
+		c.fetched = c.Read(c.addrAbs)
+	}
+	return c.fetched
+}
+
+type Instruction struct {
+	Name        string
+	Operate     func() uint8
+	AddressMode func() uint8
+	IMPFlag    bool
+	Cycles      uint8
+}
+
+func (c *CPU6502) ReturnLookup() [2]Instruction {
+	return c.lookup
+}
+
