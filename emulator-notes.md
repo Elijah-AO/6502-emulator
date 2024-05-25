@@ -3,7 +3,6 @@
 ## Tips
  - wiki.nesdev.com
  - look at data sheets for the 6502
- - 
 
 ## Intro
 
@@ -22,13 +21,12 @@
  - The PPU has its own bus to communicate with the memory mapped to graphics, VRAM, and palettes
  - The graphics (8KB) exists in the cartridge and is stored at 0x0000 - 0x1FFF
  - VRAM is 2KB and is mapped to 0x2000 - 0x27FF
- - Palettes are 32 bytes and are mapped to 0x3F00 - 0x3FFF 
+ - Palettes are 32 bytes and are mapped to 0x3F00 - 0x3FFF
  - The PPU also communicates with the OAM which is not on any bus and is used to store the current sprite on the screen
  - The PPU is clocked at 3 times the speed of the CPU
  - The CPU uses DMA to write to the OAM
  - There are additional circuitry on the cartridges called mappers which are used to extend the capabilities of the NES
  - Mappers are used for bank switching, where the CPU can configure the mapper to give different data for the same address ranges.
- - ive been going through something, 1855 days. Ive been going through something. 
 
 ### Bitwise Operatins
  - Can perform logical operations with a mask to extract specific bits
@@ -43,7 +41,7 @@
  - Each bit in a byte can be used to store a boolean value
  - Bitfields are used to store multiple boolean values in a single byte
  - Each bit in a byte can be used to store a boolean value
- - go does not have a built-in bitfield type so will need to create a register type 
+ - go does not have a built-in bitfield type so will need to create a register type
 
 
 ## CPU
@@ -70,7 +68,7 @@
     - Read the byte at the program counter
     - index the instruction matrix with the byte to get the addessing mode and the number of cycles
     - Read any bytes required by the addressing mode
-    - Execute the instruction 
+    - Execute the instruction
     - Wait for the number of cycles
   - Standard interrupts can be ignored but the non-maskable interrupt (NMI) must be handled
 
@@ -87,9 +85,6 @@
 9. Create a function for each of the 56 instructions and one for illegal instructions
 10. Create a function for the clock cycle, reset, and request interrupt and non-maskable interrupt (the last 3 are asynchronous)
 11. Create a fetch function to read the byte at the program counter
-12. Store the variable locations and cycle counts for each instruction 
+12. Store the variable locations and cycle counts for each instruction
 13. create the 16x16 matrix for the instructions
 14. create dissassembler function and store the opcodes and instructions in a map
-
-
-

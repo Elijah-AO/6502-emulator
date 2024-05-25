@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"nes-emulator/pkg/cpu"
-	"nes-emulator/pkg/memory"
 )
 
 func main() {
-	fmt.Println("Hello, NES!")
+	bus := cpu.NewDefaultBus()
 	cpu := cpu.NewCPU6502()
-	bus := memory.NewBus(cpu)
-	bus.Write(0xFFFC, 0x52)
-	fmt.Println(bus.Read(0xFFFC, false))
+	cpu.ConnectBus(bus)
+	cpu.Write(0x0000, 0xF5)
+	fmt.Printf("Read from 0x0000: %d\n", cpu.Read(0x0000))
 }
