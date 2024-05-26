@@ -14,3 +14,5 @@ func main() {
 	fmt.Printf("Read from 0x0000: %d\n", cpu.Read(0x0000))
 	fmt.Println("Instructions loaded: ", cpu.ReturnLookup())
 }
+
+// TODO: Implement pixel visualisation
