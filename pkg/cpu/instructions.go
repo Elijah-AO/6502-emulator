@@ -1,5 +1,6 @@
 package cpu
 
+import "fmt"
 // Instructions
 
 // ADC - Add Memory to Accumulator with Carry
@@ -39,7 +40,21 @@ func (c *CPU6502) BNE() uint8 { return 0 }
 func (c *CPU6502) BPL() uint8 { return 0 }
 
 // BRK - Force Break
-func (c *CPU6502) BRK() uint8 { return 0 }
+func (c *CPU6502) BRK() uint8 { 
+	c.pc++
+	c.SetFlag(I, true)
+
+	c.Write(0x0100+uint16(c.stkp), uint8((c.pc>>8)&0x00FF))
+	c.stkp--
+	c.Write(0x0100+uint16(c.stkp), uint8(c.pc&0x00FF))
+	c.stkp--
+	c.SetFlag(B, true)
+	c.Write(0x0100+uint16(c.stkp), c.status)
+	c.stkp--
+	c.SetFlag(B, false)
+	c.pc = uint16(c.Read(0xFFFE)) | uint16(c.Read(0xFFFF))<<8
+	return 0
+}
 
 // BVC - Branch on Overflow Clear
 func (c *CPU6502) BVC() uint8 { return 0 }
@@ -96,7 +111,13 @@ func (c *CPU6502) JMP() uint8 { return 0 }
 func (c *CPU6502) JSR() uint8 { return 0 }
 
 // LDA - Load Accumulator with Memory
-func (c *CPU6502) LDA() uint8 { return 0 }
+func (c *CPU6502) LDA() uint8 { 
+	c.Fetch()	
+	c.a = c.fetched
+	c.SetFlag(Z, c.a == 0x00)
+	c.SetFlag(N, c.a&0x80 != 0)
+	return 1
+}
 
 // LDX - Load Index X with Memory
 func (c *CPU6502) LDX() uint8 { return 0 }
@@ -132,7 +153,18 @@ func (c *CPU6502) ROL() uint8 { return 0 }
 func (c *CPU6502) ROR() uint8 { return 0 }
 
 // RTI - Return from Interrupt
-func (c *CPU6502) RTI() uint8 { return 0 }
+func (c *CPU6502) RTI() uint8 { 
+	c.stkp++
+	c.status = c.Read(0x0100 + uint16(c.stkp))
+	c.status &= ^uint8(B)
+	c.status &= ^uint8(U)
+	c.stkp++
+	c.pc = uint16(c.Read(0x0100 + uint16(c.stkp)))
+	c.stkp++
+	c.pc |= uint16(c.Read(0x0100 + uint16(c.stkp))) << 8
+	c.stkp++
+	return 0
+}
 
 // RTS - Return from Subroutine
 func (c *CPU6502) RTS() uint8 { return 0 }
@@ -178,3 +210,38 @@ func (c *CPU6502) TYA() uint8 { return 0 }
 
 // XXX - Undefined Operation
 func (c *CPU6502) XXX() uint8 { return 0 }
+
+
+// Disassembler
+
+func (c *CPU6502) Disassemble(start, stop uint16) map[uint16]string {
+	var addr uint16 = start
+	var value uint8 = 0x00
+	//var lo uint8 = 0x00
+	//var hi uint8 = 0x00
+	var lineAddr uint16 = 0
+	var mapLines map[uint16]string = make(map[uint16]string)
+
+	for addr <= stop {
+		lineAddr = addr
+		line := "$" + fmt.Sprintf("%04X: ", addr)
+		opcode := c.bus.Read(addr, true)
+		addr++
+		line += fmt.Sprintf("%02X ", opcode)
+		addrName := c.lookup[opcode].AddressName
+		switch addrName {
+		case "IMP":
+			line += "IMP"
+		case "IMM":
+			value = c.bus.Read(addr, true)
+			addr++
+			line += fmt.Sprintf("IMM $%02X", value)
+		
+		// TODO: Add more address modes
+		default:
+			line += "UNK"
+		}
+		mapLines[lineAddr] = line
+	}
+	return mapLines
+}

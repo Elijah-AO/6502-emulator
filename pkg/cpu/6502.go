@@ -2,7 +2,7 @@ package cpu
 
 type CPU6502 struct {
 	bus     Bus
-	lookup  [2]Instruction
+	lookup  [3]Instruction
 	a       uint8
 	x       uint8
 	y       uint8
@@ -30,9 +30,16 @@ func NewCPU6502() *CPU6502 {
 		opcode:  0x00,
 		cycles:  0,
 	}
-	cpu.lookup = [2]Instruction{{"BRK", (*cpu).BRK, (*cpu).IMM, false, 7}, {"RTI", (*cpu).RTI, (*cpu).IMP, true, 6}}
+	cpu.lookup = [3]Instruction{{"BRK", "IMM", (*cpu).BRK, (*cpu).IMM, false, 7}, 
+								{"RTI", "IMP", (*cpu).RTI, (*cpu).IMP, true, 6},
+								{"LDA", "IMM", (*cpu).LDA, (*cpu).IMM, false, 2}}
 	return cpu
 }
+
+func (c *CPU6502) GetState() (uint8, uint8, uint8, uint8, uint16, uint8, uint8, uint16, uint16, uint8, uint8) {
+	return c.a, c.x, c.y, c.stkp, c.pc, c.status, c.fetched, c.addrAbs, c.addrRel, c.opcode, c.cycles
+}
+
 
 func (c *CPU6502) ConnectBus(bus Bus) {
 	c.bus = bus
@@ -41,6 +48,7 @@ func (c *CPU6502) ConnectBus(bus Bus) {
 func (c *CPU6502) Read(addr uint16) uint8 {
 	return c.bus.Read(addr, false) // readOnly = false
 }
+
 
 func (c *CPU6502) Write(addr uint16, data uint8) {
 	c.bus.Write(addr, data)
@@ -170,13 +178,14 @@ func (c *CPU6502) Fetch() uint8 {
 
 type Instruction struct {
 	Name        string
+	AddressName string
 	Operate     func() uint8
 	AddressMode func() uint8
 	IMPFlag    bool
 	Cycles      uint8
 }
 
-func (c *CPU6502) ReturnLookup() [2]Instruction {
+func (c *CPU6502) ReturnLookup() [3]Instruction {
 	return c.lookup
 }
 
