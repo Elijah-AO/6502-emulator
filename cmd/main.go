@@ -38,16 +38,16 @@ func (v *visualisation) displayCPU(txt *text.Text) {
 	flags := [8]string{"C", "Z", "I", "D", "B", "-", "V", "N"}
 	flagArray := [8]bool{v.cpu.GetCFlag(), v.cpu.GetZFlag(), v.cpu.GetIFlag(), v.cpu.GetDFlag(), v.cpu.GetBFlag(), v.cpu.GetUFlag(), v.cpu.GetVFlag(), v.cpu.GetNFlag()}
 	fmt.Fprintf(txt, "Status: ")
-		for i := 0; i < 8; i++ {
-			if flagArray[i] {
-				txt.Color = colornames.Lightgreen
-			} else {
-				txt.Color = colornames.Red 
-			}
-			fmt.Fprintf(txt, " %s", flags[i])
+	for i := 0; i < 8; i++ {
+		if flagArray[i] {
+			txt.Color = colornames.Lightgreen
+		} else {
+			txt.Color = colornames.Red
 		}
+		fmt.Fprintf(txt, " %s", flags[i])
+	}
 	txt.Color = colornames.White
-	time.Sleep(50 * time.Millisecond)
+
 	a, x, y, stkp, pc, status, fetched, addrAbs, addrRel, opcode, cycles := v.cpu.GetState()
 	fmt.Fprintf(txt, "\nA: $%02X [%d] \nX: $%02X [%d] \nY: $%02X [%d] \nStack P: $%04X \nPC: $%04X \n\nStatus: $%04X \nFetched: $%04X \nAddrAbs: $%04X \nAddrRel: $%04X \nOpcode: $%X \nCycles: %d \n", a, a, x, x, y, y, stkp, pc, status, fetched, addrAbs, addrRel, opcode, cycles)
 }
@@ -76,8 +76,8 @@ func run() {
 
 	for !win.Closed() {
 		win.Clear(colornames.Darkblue)
-        txtCPU.Clear()
-		txt.Clear()		
+		txtCPU.Clear()
+		txt.Clear()
 		switch {
 		case win.Pressed(pixelgl.KeyI):
 			cpu.SetIFlag(!cpu.GetIFlag())
@@ -97,22 +97,26 @@ func run() {
 			cpu.SetNFlag(!cpu.GetNFlag())
 		case win.Pressed(pixelgl.KeySpace):
 			cpu.Clock()
+		case win.Pressed(pixelgl.KeyR):
+			cpu.Reset()
 		}
-		
+		time.Sleep(100 * time.Millisecond)
+
 		vis.displayMemory(txt, 0x0000, 15, 16)
-		fmt.Fprintf(txt, "\n")	
+		fmt.Fprintf(txt, "\n")
 		vis.displayMemory(txt, 0x8000, 15, 16)
 		vis.displayCPU(txtCPU)
 		txt.Draw(win, pixel.IM.Scaled(txt.Orig, 2))
 		txtCPU.Draw(win, pixel.IM.Scaled(txtCPU.Orig, 2))
-		
-        win.Update()
-    }
+
+		win.Update()
+	}
 }
 
 func main() {
-    pixelgl.Run(run)
+	pixelgl.Run(run)
 }
+
 /*
 TODO:
 Understand PC 8000 at reset

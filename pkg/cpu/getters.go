@@ -80,6 +80,26 @@ func (c *CPU6502) GetCycles() uint8 {
 	return c.cycles
 }
 
+func (c *CPU6502) GetState() (uint8, uint8, uint8, uint8, uint16, uint8, uint8, uint16, uint16, uint8, uint8) {
+	return c.a, c.x, c.y, c.stkp, c.pc, c.status, c.fetched, c.addrAbs, c.addrRel, c.opcode, c.cycles
+}
+
+func (c *CPU6502) GetLookup() [256]Instruction {
+	return c.lookup
+}
+
+func (c *CPU6502) GetFlag(flag Flags6502) bool {
+	return (c.status & uint8(flag)) > 0
+}
+
+func (c *CPU6502) SetFlag(flag Flags6502, value bool) {
+	if value {
+		c.status |= uint8(flag)
+	} else {
+		c.status &= ^uint8(flag)
+	}
+}
+
 func (c *CPU6502) SetIFlag(value bool) {
 	c.SetFlag(I, value)
 }
