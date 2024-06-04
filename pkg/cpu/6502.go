@@ -112,6 +112,10 @@ func (c *CPU6502) Clock() {
 	c.cycles--
 }
 
+func (c *CPU6502) Complete() bool {
+	return c.cycles == 0
+}
+
 func (c *CPU6502) Reset() {
 	c.a = 0
 	c.x = 0

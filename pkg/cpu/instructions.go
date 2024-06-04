@@ -541,33 +541,82 @@ func (c *CPU6502) TYA() uint8 {
 func (c *CPU6502) XXX() uint8 { return 0 }
 
 // Disassembler
-
+// TODO: Refactor
 func (c *CPU6502) Disassemble(start, stop uint16) map[uint16]string {
-	var addr uint16 = start
+	var addr uint32 = uint32(start)
 	var value uint8 = 0x00
-	//var lo uint8 = 0x00
-	//var hi uint8 = 0x00
+	var lo uint8 = 0x00
+	var hi uint8 = 0x00
 	var lineAddr uint16 = 0
 	var mapLines map[uint16]string = make(map[uint16]string)
 
-	for addr <= stop {
-		lineAddr = addr
+	for addr <= uint32(stop) {
+		lineAddr = uint16(addr)
 		line := "$" + fmt.Sprintf("%04X: ", addr)
-		opcode := c.bus.Read(addr, true)
+		opcode := c.bus.Read(uint16(addr), true)
 		addr++
 		line += fmt.Sprintf("%02X ", opcode)
 		addrName := c.lookup[opcode].AddrName
 		switch addrName {
 		case "IMP":
-			line += "IMP"
+			line += "{IMP}"
 		case "IMM":
-			value = c.bus.Read(addr, true)
+			value = c.bus.Read(uint16(addr), true)
 			addr++
-			line += fmt.Sprintf("IMM $%02X", value)
-
-		// TODO: Add more address modes
-		default:
-			line += "UNK"
+			line += fmt.Sprintf("$%02X {IMM}", value)
+		case "ZP0":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = 0x00
+			line += fmt.Sprintf("$%02X, {ZP0}", lo)
+		case "ZPX":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = 0x00
+			line += fmt.Sprintf("$%02X, X {ZPX}", lo)
+		case "ZPY":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = 0x00
+			line += fmt.Sprintf("$%02X, Y {ZPY}", lo)
+		case "IZX":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = 0x00
+			line += fmt.Sprintf("($%02X, X) {IZX}", lo)
+		case "IZY":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = 0x00
+			line += fmt.Sprintf("($%02X), Y {IZY}", lo)
+		case "ABS":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = c.bus.Read(uint16(addr), true)
+			addr++
+			line += fmt.Sprintf("$%04X {ABS}", uint16(hi)<<8|uint16(lo))
+		case "ABX":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = c.bus.Read(uint16(addr), true)
+			addr++
+			line += fmt.Sprintf("$%04X, X {ABX}", uint16(hi)<<8|uint16(lo))
+		case "ABY":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = c.bus.Read(uint16(addr), true)
+			addr++
+			line += fmt.Sprintf("$%04X, Y {ABY}", uint16(hi)<<8|uint16(lo))
+		case "IND":
+			lo = c.bus.Read(uint16(addr), true)
+			addr++
+			hi = c.bus.Read(uint16(addr), true)
+			addr++
+			line += fmt.Sprintf("($%04X) {IND}", uint16(hi)<<8|uint16(lo))
+		case "REL":
+			value = c.bus.Read(uint16(addr), true)
+			addr++
+			line += fmt.Sprintf("$%02X [$%04X] {REL}", value, uint16(addr)+uint16(value))
 		}
 		mapLines[lineAddr] = line
 	}
