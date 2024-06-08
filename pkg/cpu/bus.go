@@ -8,8 +8,6 @@ type Bus interface {
 type DefaultBus struct {
 	cpu CPU6502
 	ram [64 * 1024]uint8
-
-	// TODO: Clear RAM contents
 }
 
 func NewDefaultBus() *DefaultBus {

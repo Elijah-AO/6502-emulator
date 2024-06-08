@@ -75,7 +75,6 @@
 ### Code
 1. Create bus and cpu structs
   - Define what devices are connected to the bus (CPU and RAM - reset to zero)
-
 2. Create a function to read and write to the bus
 3. Connect the CPU to the bus, the cpu will read and write to the bus
 4. Create an enum for the bits of the status register
@@ -87,4 +86,12 @@
 11. Create a fetch function to read the byte at the program counter
 12. Store the variable locations and cycle counts for each instruction
 13. create the 16x16 matrix for the instructions
-14. create dissassembler function and store the opcodes and instructions in a map
+14. create dissassembler function and store the opcodes and instructions in a map. Make sure to add a read only flag when reading from memory.
+15. Optional - create a simple visualiser for the CPU instructions.
+
+## Buses, RAM, ROM, and Mappers
+
+### Notes
+ - 
+
+
