@@ -554,8 +554,9 @@ func (c *CPU6502) Disassemble(start, stop uint16) map[uint16]string {
 		lineAddr = uint16(addr)
 		line := "$" + fmt.Sprintf("%04X: ", addr)
 		opcode := c.bus.Read(uint16(addr), true)
+		name := c.lookup[opcode].Name
 		addr++
-		line += fmt.Sprintf("%02X ", opcode)
+		line += fmt.Sprintf("%s %02X ", name, opcode)
 		addrName := c.lookup[opcode].AddrName
 		switch addrName {
 		case "IMP":

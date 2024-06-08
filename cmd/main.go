@@ -1,10 +1,9 @@
 package main
 
 import (
-	"time"
-	//"time"
 	"fmt"
 	"nes-emulator/pkg/cpu"
+	//"time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -52,11 +51,27 @@ func (v *visualisation) displayCPU(txt *text.Text) {
 	fmt.Fprintf(txt, "\nA: $%02X [%d] \nX: $%02X [%d] \nY: $%02X [%d] \nStack P: $%04X \nPC: $%04X \n\nStatus: $%04X \nFetched: $%04X \nAddrAbs: $%04X \nAddrRel: $%04X \nOpcode: $%X \nCycles: %d \n", a, a, x, x, y, y, stkp, pc, status, fetched, addrAbs, addrRel, opcode, cycles)
 }
 
+func (v *visualisation) displayCode(txt *text.Text, lines, start int) {
+	disassembly := v.cpu.Disassemble(0x0000, 0xFFFF)
+	curr := disassembly[uint16(start)]
+	for i := 1; i < lines; i++ {
+		if curr != "" {
+			fmt.Fprintln(txt, curr)
+		}
+		curr = disassembly[uint16(start)+uint16(i)]
+	}
+}
+
 func run() {
 	bus := cpu.NewDefaultBus()
 	cpu := cpu.NewCPU6502()
 	cpu.ConnectBus(bus)
 	vis := NewVisualisation(cpu, bus)
+
+	cpu.Write(0xFFFC, 0x00)
+	cpu.Write(0xFFFD, 0x80)
+	instructions := []string{"A2", "0A", "8E", "00", "00", "A2", "03", "8E", "01", "00", "AC", "00", "00", "A9", "00", "18", "6D", "01", "00", "88", "D0", "FA", "8D", "02", "00", "EA", "EA", "EA"}
+	cpu.LoadProgram(instructions, 0x8000)
 	cpu.Reset()
 
 	cfg := pixelgl.WindowConfig{
@@ -73,26 +88,16 @@ func run() {
 	txt := text.New(pixel.V(10, 970), atlas)
 	txt.Color = colornames.White
 	txtCPU := text.New(pixel.V(800, 970), atlas)
+	txtCode := text.New(pixel.V(800, 556), atlas)
 
 	for !win.Closed() {
 		win.Clear(colornames.Darkblue)
 		txtCPU.Clear()
 		txt.Clear()
+		txtCode.Clear()
 		switch {
 		case win.Pressed(pixelgl.KeyI):
 			cpu.SetIFlag(!cpu.GetIFlag())
-		case win.Pressed(pixelgl.KeyC):
-			cpu.SetCFlag(!cpu.GetCFlag())
-		case win.Pressed(pixelgl.KeyZ):
-			cpu.SetZFlag(!cpu.GetZFlag())
-		case win.Pressed(pixelgl.KeyD):
-			cpu.SetDFlag(!cpu.GetDFlag())
-		case win.Pressed(pixelgl.KeyB):
-			cpu.SetBFlag(!cpu.GetBFlag())
-		case win.Pressed(pixelgl.KeyU):
-			cpu.SetUFlag(!cpu.GetUFlag())
-		case win.Pressed(pixelgl.KeyV):
-			cpu.SetVFlag(!cpu.GetVFlag())
 		case win.Pressed(pixelgl.KeyN):
 			cpu.SetNFlag(!cpu.GetNFlag())
 		case win.Pressed(pixelgl.KeySpace):
@@ -100,14 +105,16 @@ func run() {
 		case win.Pressed(pixelgl.KeyR):
 			cpu.Reset()
 		}
-		time.Sleep(100 * time.Millisecond)
+		//time.Sleep(100 * time.Millisecond)
 
 		vis.displayMemory(txt, 0x0000, 15, 16)
 		fmt.Fprintf(txt, "\n")
 		vis.displayMemory(txt, 0x8000, 15, 16)
 		vis.displayCPU(txtCPU)
+		vis.displayCode(txtCode, 50, int(vis.cpu.GetPc()))
 		txt.Draw(win, pixel.IM.Scaled(txt.Orig, 2))
 		txtCPU.Draw(win, pixel.IM.Scaled(txtCPU.Orig, 2))
+		txtCode.Draw(win, pixel.IM.Scaled(txtCode.Orig, 2))
 
 		win.Update()
 	}
@@ -116,15 +123,3 @@ func run() {
 func main() {
 	pixelgl.Run(run)
 }
-
-/*
-TODO:
-Understand PC 8000 at reset
-Test some instructions
-add help to the bottom of the screen
-
-
-
-
-
-*/
