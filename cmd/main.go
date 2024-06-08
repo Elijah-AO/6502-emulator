@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"nes-emulator/pkg/cpu"
-	//"time"
+	"nes-emulator/pkg/memory"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -14,10 +14,10 @@ import (
 
 type visualisation struct {
 	cpu *cpu.CPU6502
-	bus cpu.Bus
+	bus *memory.DefaultBus
 }
 
-func NewVisualisation(cpu *cpu.CPU6502, bus cpu.Bus) *visualisation {
+func NewVisualisation(cpu *cpu.CPU6502, bus *memory.DefaultBus) *visualisation {
 	return &visualisation{cpu: cpu, bus: bus}
 }
 
@@ -63,9 +63,12 @@ func (v *visualisation) displayCode(txt *text.Text, lines, start int) {
 }
 
 func run() {
-	bus := cpu.NewDefaultBus()
+	/*bus := cpu.NewDefaultBus()
 	cpu := cpu.NewCPU6502()
-	cpu.ConnectBus(bus)
+	cpu.ConnectBus(bus)*/
+
+	bus := memory.NewDefaultBus()
+	cpu := cpu.NewCPU6502(bus)
 	vis := NewVisualisation(cpu, bus)
 
 	cpu.Write(0xFFFC, 0x00)

@@ -1,4 +1,4 @@
-package cpu
+package memory
 
 type Bus interface {
 	Read(addr uint16, readOnly bool) uint8
@@ -6,7 +6,7 @@ type Bus interface {
 }
 
 type DefaultBus struct {
-	cpu CPU6502
+	//cpu CPU6502
 	ram [64 * 1024]uint8
 }
 
@@ -15,7 +15,7 @@ func NewDefaultBus() *DefaultBus {
 	for i := range b.ram {
 		b.ram[i] = 0x00
 	}
-	b.cpu.ConnectBus(b)
+	//b.cpu.ConnectBus(b)
 	return b
 }
 

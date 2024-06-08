@@ -1,9 +1,12 @@
 package cpu
 
-import "strconv"
+import (
+	"nes-emulator/pkg/memory"
+	"strconv"
+)
 
 type CPU6502 struct {
-	bus     Bus
+	bus     memory.Bus
 	lookup  [256]Instruction
 	a       uint8
 	x       uint8
@@ -40,8 +43,9 @@ const (
 	N                       // Negative
 )
 
-func NewCPU6502() *CPU6502 {
+func NewCPU6502(bus memory.Bus) *CPU6502 {
 	cpu := &CPU6502{
+		bus:     bus,
 		a:       0x00,
 		x:       0x00,
 		y:       0x00,
@@ -74,10 +78,6 @@ func NewCPU6502() *CPU6502 {
 	}
 
 	return cpu
-}
-
-func (c *CPU6502) ConnectBus(bus Bus) {
-	c.bus = bus
 }
 
 func (c *CPU6502) Read(addr uint16) uint8 {

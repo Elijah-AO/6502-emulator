@@ -56,9 +56,9 @@ func (c *CPU6502) GetNFlag() bool {
 	return c.GetFlag(N)
 }
 
-func (c *CPU6502) GetBus() Bus {
-	return c.bus
-}
+//func (c *CPU6502) GetBus() Bus {
+//	return c.bus
+//}
 
 func (c *CPU6502) GetFetched() uint8 {
 	return c.fetched
@@ -154,10 +154,6 @@ func (c *CPU6502) SetPc(value uint16) {
 
 func (c *CPU6502) SetStatus(value uint8) {
 	c.status = value
-}
-
-func (c *CPU6502) SetBus(value Bus) {
-	c.bus = value
 }
 
 func (c *CPU6502) SetFetched(value uint8) {
