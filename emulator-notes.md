@@ -92,6 +92,22 @@
 ## Buses, RAM, ROM, and Mappers
 
 ### Notes
- - 
+ - The NES is composed of 3 main segments: CPU, PPU, and Cartridge
+ - The CPU covers the CPU bus, RAM, APU, and controller ports
+ - The PPU covers PPU bus, *pattern memory*, name tables, palettes
+ - The Cartridge covers pattern tables, mapper, and PRG ROM
+ - The RAM is mapped from 0x0000 - 0x1FFF and is mirrored 4 times (its true size is 2KB). We use mirroring to save space on the board.
+  - We can use a mask to get the true address of the RAM
+  - Both the CPU and PPU can read and write to the cartridge
+  - Program memory is often referred to as PRG ROM, and pattern memory is often referred to as CHR ROM
 
-
+### Code
+1. Create a structs for the ppu and cartridge
+2. Change bus struct to include the ppu and cartridge, and change existing methods to include the ppu and cartridge, and mirroring
+3. Create a function to read and write to the ppu and cartridge
+4. Create a function to connect the ppu and cartridge to the bus
+5. Add insert cartridge, reset, and clock/clockcounter methods to the bus struct
+6. Add ppu devices (pattern memory, name tables, palettes)
+7. Add PRG ROM and CHR ROM to the cartridge struct
+8. Add sHeader struct to store the header information of the cartridge
+9. Add mapper struct to store the mapper information
