@@ -67,7 +67,7 @@ func run() {
 	cpu := cpu.NewCPU6502()
 	cpu.ConnectBus(bus)*/
 
-	bus := memory.NewDefaultBus()
+	bus := memory.NewDefaultBus(64*1024)
 	cpu := cpu.NewCPU6502(bus)
 	vis := NewVisualisation(cpu, bus)
 
@@ -76,7 +76,6 @@ func run() {
 	instructions := []string{"A2", "0A", "8E", "00", "00", "A2", "03", "8E", "01", "00", "AC", "00", "00", "A9", "00", "18", "6D", "01", "00", "88", "D0", "FA", "8D", "02", "00", "EA", "EA", "EA"}
 	cpu.LoadProgram(instructions, 0x8000)
 	cpu.Reset()
-
 	cfg := pixelgl.WindowConfig{
 		Title:  "NES Emulator",
 		Bounds: pixel.R(0, 0, 1280, 1000),
