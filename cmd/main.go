@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"nes-emulator/pkg/cpu"
 	"nes-emulator/pkg/memory"
-
+	"nes-emulator/pkg/nes"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/faiface/pixel/text"
@@ -124,4 +124,9 @@ func run() {
 
 func main() {
 	pixelgl.Run(run)
+	nes := nes.NewNES("roms/nestest.nes")
+	nes.Reset()
+	for i := 0; i < 10000000; i++ {
+		nes.Clock()
+	}
 }

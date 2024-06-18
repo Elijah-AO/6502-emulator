@@ -15,7 +15,7 @@
  - CPU can address 64KB of memory (most of which is not used)
  - APU is part of the CPU and is mapped to 0x4000 - 0x4017 (24 bytes)
  - The cartridge is mapped to 0x4020 - 0xFFFF, the end of the address space
- - PPU (2C02) is the graphics chip and is mapped to 0x2000 - 0x2007
+ - PPU (2C02) is the graphics chip and is mapped to 0x2000 - 0x2007, though it can be addressed up to 0x3FFF
  - Every clock cycle the PPU reads a byte from the cartridge
  - The CPU and PPU run at different clock speeds
  - The PPU has its own bus to communicate with the memory mapped to graphics, VRAM, and palettes
@@ -100,6 +100,7 @@
   - We can use a mask to get the true address of the RAM
   - Both the CPU and PPU can read and write to the cartridge
   - Program memory is often referred to as PRG ROM, and pattern memory is often referred to as CHR ROM
+  - NOTE: The last item read is not necessarily the last item written, and reading can change the state of the device
 
 ### Code
 1. Create a structs for the ppu and cartridge
