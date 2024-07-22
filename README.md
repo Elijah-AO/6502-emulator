@@ -1,5 +1,10 @@
 # Emulation Tutorial 
 
+## Images
+![Go](go.png)
+![Python](python.png)
+
+
 ## Tips
  - wiki.nesdev.com
  - look at data sheets for the 6502
