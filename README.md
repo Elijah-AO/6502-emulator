@@ -1,8 +1,9 @@
+# TBC
+
 # Emulation Tutorial 
 
-## Images
+## CPU Images
 ![Go](go.png)
-![Python](python.png)
 
 
 ## Tips
